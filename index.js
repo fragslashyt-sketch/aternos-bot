@@ -8,7 +8,7 @@ app.listen(port, '0.0.0.0', () => console.log(`Web server on port ${port}`));
 const mineflayer = require('mineflayer');
 
 const botArgs = {
-  host: 'mantaray.aternos.host', // Using the Dyn IP from your screenshot
+  host: 'cuis.aternos.host', // Using the Dyn IP from your screenshot
   port: 24897,                      
   username: 'TrainingACat', 
   version: '1.21.1' 
