@@ -1,3 +1,10 @@
+const express = require('express');
+const app = express();
+app.get('/', (req, res) => res.send('Bot is Online!'));
+app.listen(process.env.PORT || 3000);
+
+// YOUR MINECRAFT BOT CODE STARTS HERE
+
 const mineflayer = require('mineflayer');
 const { Movements, pathfinder, goals } = require('mineflayer-pathfinder');
 const { GoalBlock } = goals;
