@@ -1,61 +1,44 @@
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000; 
 
-app.get('/', (req, res) => res.send('Hyper-Active Bot is Live!'));
-app.listen(port, () => console.log(`Live on ${port}`));
+app.get('/', (req, res) => res.send('Bot is trying to connect...'));
+app.listen(port, '0.0.0.0', () => console.log(`Web server on port ${port}`));
 
 const mineflayer = require('mineflayer');
 
 const botArgs = {
-  host: 'fragslashsmp.aternos.me', 
+  host: 'mantaray.aternos.host', // Using the Dyn IP from your screenshot
   port: 24897,                      
   username: 'TrainingACat', 
-  version: '1.21.1'
+  version: '1.21.1' 
 };
 
 const initBot = () => {
+  console.log('--- Attempting Connection via Dyn IP ---');
   const bot = mineflayer.createBot(botArgs);
 
   bot.on('spawn', () => {
-    console.log('Bot spawned! Hyper-active mode engaged.');
-    
-    // ACTION LOOP: Runs every 1.5 seconds
+    console.log('SUCCESS: BOT IS IN THE GAME!');
+    // Hyper-active movement loop
     setInterval(() => {
-      const r = Math.random();
-
-      if (r < 0.25) {
-        // 1. Move & Look in a random direction
-        const yaw = Math.random() * Math.PI * 2;
-        bot.look(yaw, (Math.random() - 0.5));
-        bot.setControlState('forward', true);
-        setTimeout(() => bot.setControlState('forward', false), 800);
-      } 
-      else if (r < 0.50) {
-        // 2. Jump & Swing Arm
-        bot.setControlState('jump', true);
-        bot.swingArm('right');
-        setTimeout(() => bot.setControlState('jump', false), 400);
-      } 
-      else if (r < 0.75) {
-        // 3. Dig/Punch at whatever it is looking at
-        const block = bot.blockAtCursor(4);
-        if (block && block.name !== 'air') {
-          bot.dig(block, true).catch(() => {});
-        } else {
-          bot.swingArm('right');
-        }
-      } 
-      else {
-        // 4. Sneak (Crouch)
-        bot.setControlState('sneak', true);
-        setTimeout(() => bot.setControlState('sneak', false), 1000);
-      }
-    }, 1500); 
+      bot.look(Math.random() * Math.PI * 2, (Math.random() - 0.5));
+      bot.setControlState('forward', true);
+      setTimeout(() => bot.setControlState('forward', false), 700);
+      bot.swingArm('right');
+      if (Math.random() > 0.5) bot.setControlState('jump', true);
+      setTimeout(() => bot.setControlState('jump', false), 400);
+    }, 1500);
   });
 
-  bot.on('end', () => setTimeout(initBot, 60000));
-  bot.on('error', (err) => console.log('Bot Error:', err));
+  bot.on('error', (err) => {
+    console.log('Connection Failed:', err.message);
+  });
+
+  bot.on('end', () => {
+    console.log('Disconnected. Retrying in 30 seconds...');
+    setTimeout(initBot, 30000);
+  });
 };
 
 initBot();
