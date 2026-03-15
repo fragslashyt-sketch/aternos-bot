@@ -2,8 +2,8 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.get('/', (req, res) => res.send('Pro-Stealth Bot is Live!'));
-app.listen(port, () => console.log(`Keep-alive server on port ${port}`));
+app.get('/', (req, res) => res.send('Active Pro-Bot is Live!'));
+app.listen(port, () => console.log(`Live on ${port}`));
 
 const mineflayer = require('mineflayer');
 
@@ -11,53 +11,56 @@ const botArgs = {
   host: 'fragslashsmp.aternos.me', 
   port: 24897,                      
   username: 'TrainingACat', 
-  version: '1.21.11' // Matches your Aternos screenshot
+  version: '1.21.11'
 };
 
 const initBot = () => {
   const bot = mineflayer.createBot(botArgs);
 
   bot.on('spawn', () => {
-    console.log('Bot spawned! Starting pro movements...');
+    console.log('Bot spawned! Hyper-active mode engaged.');
     
-    // Every 20-40 seconds, pick a random "human" action
+    // ACTION LOOP: Runs every 1.5 seconds
     setInterval(() => {
-      const actionType = Math.random();
+      const r = Math.random();
 
-      if (actionType < 0.4) {
-        // 1. Walk in a random direction
+      if (r < 0.25) {
+        // 1. Move & Look
         const yaw = Math.random() * Math.PI * 2;
-        bot.look(yaw, 0);
+        bot.look(yaw, (Math.random() - 0.5));
         bot.setControlState('forward', true);
-        setTimeout(() => bot.setControlState('forward', false), 2500);
-        console.log('Action: Walking around');
-
-      } else if (actionType < 0.7) {
-        // 2. Look around and "punch" air or blocks
-        bot.look(Math.random() * Math.PI * 2, (Math.random() - 0.5));
-        bot.swingArm('right');
-        console.log('Action: Looking and swinging');
-
-      } else {
-        // 3. Jump and "sneak" (crouch)
+        setTimeout(() => bot.setControlState('forward', false), 800);
+      } 
+      else if (r < 0.50) {
+        // 2. Jump & Swing
         bot.setControlState('jump', true);
+        bot.swingArm('right');
+        setTimeout(() => bot.setControlState('jump', false), 400);
+      } 
+      else if (r < 0.75) {
+        // 3. Dig/Punch at cursor
+        const block = bot.blockAtCursor(4);
+        if (block && block.name !== 'air') {
+          bot.dig(block, true).catch(() => {});
+        } else {
+          bot.swingArm('right');
+        }
+      } 
+      else {
+        // 4. Sneak & Chat
         bot.setControlState('sneak', true);
-        setTimeout(() => {
-          bot.setControlState('jump', false);
-          bot.setControlState('sneak', false);
-        }, 800);
-        console.log('Action: Jump and crouch');
+        setTimeout(() => bot.setControlState('sneak', false), 1000);
+        // 30% chance to say something random
+        if (Math.random() < 0.05) {
+          const msgs = ['lag?', 'lol', 'nice', 'gg'];
+          bot.chat(msgs[Math.floor(Math.random() * msgs.length)]);
+        }
       }
-
-    }, Math.floor(Math.random() * 20000) + 20000);
+    }, 1500); 
   });
 
-  bot.on('end', () => {
-    console.log('Disconnected. Reconnecting in 60s...');
-    setTimeout(initBot, 60000);
-  });
-
-  bot.on('error', (err) => console.log('Bot Error:', err));
+  bot.on('end', () => setTimeout(initBot, 60000));
+  bot.on('error', (err) => console.log(err));
 };
 
 initBot();
