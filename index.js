@@ -1,7 +1,9 @@
 const express = require('express');
 const app = express();
-app.get('/', (req, res) => res.send('Bot is Waiting...'));
-app.listen(process.env.PORT || 3000);
+const port = process.env.PORT || 3000;
+
+app.get('/', (req, res) => res.send('Hyper-Active Bot is Live!'));
+app.listen(port, () => console.log(`Live on ${port}`));
 
 const mineflayer = require('mineflayer');
 
@@ -13,27 +15,47 @@ const botArgs = {
 };
 
 const initBot = () => {
-  console.log('--- Attempting to Join Aternos ---');
   const bot = mineflayer.createBot(botArgs);
 
   bot.on('spawn', () => {
-    console.log('SUCCESS: Bot is now in the server!');
-    // Random movements to stay active
+    console.log('Bot spawned! Hyper-active mode engaged.');
+    
+    // ACTION LOOP: Runs every 1.5 seconds
     setInterval(() => {
-      bot.setControlState('jump', true);
-      setTimeout(() => bot.setControlState('jump', false), 500);
-      bot.swingArm('right');
-    }, 30000);
+      const r = Math.random();
+
+      if (r < 0.25) {
+        // 1. Move & Look in a random direction
+        const yaw = Math.random() * Math.PI * 2;
+        bot.look(yaw, (Math.random() - 0.5));
+        bot.setControlState('forward', true);
+        setTimeout(() => bot.setControlState('forward', false), 800);
+      } 
+      else if (r < 0.50) {
+        // 2. Jump & Swing Arm
+        bot.setControlState('jump', true);
+        bot.swingArm('right');
+        setTimeout(() => bot.setControlState('jump', false), 400);
+      } 
+      else if (r < 0.75) {
+        // 3. Dig/Punch at whatever it is looking at
+        const block = bot.blockAtCursor(4);
+        if (block && block.name !== 'air') {
+          bot.dig(block, true).catch(() => {});
+        } else {
+          bot.swingArm('right');
+        }
+      } 
+      else {
+        // 4. Sneak (Crouch)
+        bot.setControlState('sneak', true);
+        setTimeout(() => bot.setControlState('sneak', false), 1000);
+      }
+    }, 1500); 
   });
 
-  bot.on('error', (err) => {
-    console.log('Connection Error:', err.message);
-  });
-
-  bot.on('end', () => {
-    console.log('Disconnected. Retrying in 60s...');
-    setTimeout(initBot, 60000);
-  });
+  bot.on('end', () => setTimeout(initBot, 60000));
+  bot.on('error', (err) => console.log('Bot Error:', err));
 };
 
 initBot();
